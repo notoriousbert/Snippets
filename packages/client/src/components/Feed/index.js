@@ -24,9 +24,9 @@ export default function Feed() {
   const {
     state: { user },
   } = useProvideAuth();
-  const [queryEntered, setQueryEntered] = useState(false)
+  const [queryEntered, setQueryEntered] = useState(false);
   const [posts, setPosts] = useState(null);
-  const [filteredPosts, setFilteredPosts] = useState([])
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [postLoading, setPostLoading] = useState(true);
   const [postError, setPostError] = useState(false);
   const [searchData, setSearchData] = useState(initialStateForSearch);
@@ -44,26 +44,24 @@ export default function Feed() {
     const query = event.target.value.toLowerCase();
 
     const fuse = new Fuse(posts, {
-      keys: ["text", "author.username"]
+      keys: ["text", "author.username"],
     });
 
-    const finalResult = []
-    const result = fuse.search(query)
+    const finalResult = [];
+    const result = fuse.search(query);
 
     if (result.length && query.length) {
       result.forEach((item) => {
         finalResult.push(item.item);
       });
       setFilteredPosts(finalResult);
-      
     } else if (result.length === 0 && query.length) {
-      setFilteredPosts([])
-      
+      setFilteredPosts([]);
     } else {
-      setFilteredPosts(posts)
+      setFilteredPosts(posts);
     }
-    
-    setQueryEntered(true)
+
+    setQueryEntered(true);
     setSearchData({
       ...searchData,
       [event.target.name]: event.target.value,
@@ -180,19 +178,21 @@ export default function Feed() {
             />
           </Form>
           {postError && "Error fetching posts"}
-          {posts && queryEntered ? 
-          filteredPosts.map((post) => {
-            if (post) {
-            return <Post key={post._id} post={post} />
-            }
-            return null
-          }) :
-          posts.map((post) => {
-            if (post) {
-            return <Post key={post._id} post={post} getPosts={getPosts} />
-            }
-            return null
-          })}
+          {posts && queryEntered
+            ? filteredPosts.map((post) => {
+                if (post) {
+                  return <Post key={post._id} post={post} />;
+                }
+                return null;
+              })
+            : posts.map((post) => {
+                if (post) {
+                  return (
+                    <Post key={post._id} post={post} getPosts={getPosts} />
+                  );
+                }
+                return null;
+              })}
         </Container>
       ) : (
         <LoadingSpinner full />

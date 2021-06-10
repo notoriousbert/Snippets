@@ -73,7 +73,6 @@ export default function Post({
     }
   };
 
-
   // Complete function to call server endpoint /posts/:id
   // with delete request
   const handleDeletePost = async () => {
@@ -87,7 +86,7 @@ export default function Post({
     setData(initialState);
     getPosts();
     handleCloseDeleteModal();
-    toast("Your post has been deleted.")
+    toast("Your post has been deleted.");
   };
 
   const handleCommentSubmit = async (event) => {
