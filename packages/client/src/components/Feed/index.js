@@ -24,8 +24,9 @@ export default function Feed() {
   const {
     state: { user },
   } = useProvideAuth();
+  const [queryEntered, setQueryEntered] = useState(false)
   const [posts, setPosts] = useState(null);
-  const [filteredPosts, setFilteredPosts] = useState(null)
+  const [filteredPosts, setFilteredPosts] = useState([])
   const [postLoading, setPostLoading] = useState(true);
   const [postError, setPostError] = useState(false);
   const [searchData, setSearchData] = useState(initialStateForSearch);
@@ -54,12 +55,15 @@ export default function Feed() {
         finalResult.push(item.item);
       });
       setFilteredPosts(finalResult);
+      
     } else if (result.length === 0 && query.length) {
       setFilteredPosts([])
+      
     } else {
-      setFilteredPosts(null)
+      setFilteredPosts(posts)
     }
- 
+    
+    setQueryEntered(true)
     setSearchData({
       ...searchData,
       [event.target.name]: event.target.value,
@@ -111,18 +115,19 @@ export default function Feed() {
       );
   };
 
+  const getPosts = async () => {
+    try {
+      const allPosts = await axios.get("posts");
+      setPosts(allPosts.data);
+      setPostLoading(false);
+    } catch (err) {
+      console.error(err.message);
+      setPostLoading(false);
+      setPostError(true);
+    }
+  };
+
   useEffect(() => {
-    const getPosts = async () => {
-      try {
-        const allPosts = await axios.get("posts");
-        setPosts(allPosts.data);
-        setPostLoading(false);
-      } catch (err) {
-        console.error(err.message);
-        setPostLoading(false);
-        setPostError(true);
-      }
-    };
     getPosts();
   }, []);
 
@@ -175,9 +180,19 @@ export default function Feed() {
             />
           </Form>
           {postError && "Error fetching posts"}
-          {posts && filteredPosts ?
-          filteredPosts.map((post) => <Post key={post._id} post={post} />) :
-          posts.map((post) => <Post key={post._id} post={post} />)}
+          {posts && queryEntered ? 
+          filteredPosts.map((post) => {
+            if (post) {
+            return <Post key={post._id} post={post} />
+            }
+            return null
+          }) :
+          posts.map((post) => {
+            if (post) {
+            return <Post key={post._id} post={post} getPosts={getPosts} />
+            }
+            return null
+          })}
         </Container>
       ) : (
         <LoadingSpinner full />

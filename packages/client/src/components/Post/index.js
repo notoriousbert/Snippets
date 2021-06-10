@@ -7,6 +7,7 @@ import {
   Media,
   Figure,
   ListGroup,
+  Modal,
 } from "react-bootstrap";
 import useRouter from "hooks/useRouter";
 import { useProvideAuth } from "hooks/useAuth";
@@ -25,6 +26,7 @@ export default function Post({
   post: { _id, author, profile_image, text, comments, created, likes },
   detail,
   userDetail,
+  getPosts,
 }) {
   const [data, setData] = useState(initialState);
   const [validated, setValidated] = useState(false);
@@ -35,6 +37,13 @@ export default function Post({
   } = useProvideAuth();
   const [likedState, setLiked] = useState(likes.includes(user.uid));
   const [likesState, setLikes] = useState(likes.length);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
+
+  const handleShowDeleteModal = () => setShowDeleteModal(true);
+  const handleCloseDeleteModal = () => setShowDeleteModal(false);
+  const toggleDeleteToast = () => setShowDeleteToast(!showDeleteToast);
+
   const handleInputChange = (event) => {
     setData({
       ...data,
@@ -64,10 +73,21 @@ export default function Post({
     }
   };
 
+
   // Complete function to call server endpoint /posts/:id
   // with delete request
   const handleDeletePost = async () => {
+    setData({
+      ...data,
+      isSubmitting: true,
+      errorMessage: null,
+    });
     console.log("Delete post", _id);
+    await axios.delete(`/posts/${_id}`);
+    setData(initialState);
+    getPosts();
+    handleCloseDeleteModal();
+    toast("Your post has been deleted.")
   };
 
   const handleCommentSubmit = async (event) => {
@@ -145,7 +165,7 @@ export default function Post({
               <div className="d-flex align-items-center">
                 {user.username === author.username && (
                   <Container className="close">
-                    <TrashIcon onClick={handleDeletePost} />
+                    <TrashIcon onClick={handleShowDeleteModal} />
                   </Container>
                 )}
               </div>
@@ -170,6 +190,27 @@ export default function Post({
                 </Button>
                 <span>{likesState}</span>
               </div>
+
+              <Modal
+                show={showDeleteModal}
+                onHide={handleCloseDeleteModal}
+                animation={false}
+              >
+                <Modal.Header closeButton className="modal-header">
+                  <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="modal-body">
+                  Are you sure you want to delete this post?
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                    Cancel
+                  </Button>
+                  <Button variant="primary" onClick={handleDeletePost}>
+                    Delete
+                  </Button>
+                </Modal.Footer>
+              </Modal>
             </div>
           </Media.Body>
         </Media>

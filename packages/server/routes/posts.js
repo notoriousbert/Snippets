@@ -61,19 +61,23 @@ router.get('/:id', async (request, response) => {
 })
 
 router.delete('/:id', requireAuth, async (request, response, next) => {
-  const { userId } = request.body
+  console.log('got here')
+  const { user } = request
   const { id } = request.params
-  const post = await Post.findOne({ _id: id })
+  const post = await Post.findById(id)
+  console.log(post)
+  console.log(user)
 
   if (!post) {
     return response.status(422).json({ error: 'Cannot find post' })
   }
-  if (post.author._id.toString() === userId.toString()) {
+  if (post.author._id.toString() === user._id.toJSON()) {
+    console.log('got to endpoint')
     try {
       const removedPost = await post.remove()
 
       const userUpdate = await User.updateOne(
-        { _id: userId },
+        { _id: user._id },
         { $pull: { posts: id } }
       )
 
