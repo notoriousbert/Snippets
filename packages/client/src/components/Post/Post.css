@@ -1,0 +1,31 @@
+.page-tweet .isLiked {
+  color: red;
+}
+
+.page-tweet .isLiked svg {
+  color: red;
+}
+
+.page-tweet__body--stats {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.trash-icon {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+}
+
+.modal-header {
+  color: black;
+}
+
+.modal-body {
+  color: black;
+}
+/*# sourceMappingURL=Post.css.map */

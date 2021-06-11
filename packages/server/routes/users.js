@@ -28,7 +28,7 @@ router
     const { id } = request.params
 
     const hashedpassword = await bcrypt.hash(password, 12)
-
+    console.log('here')
     try {
       const userUpdate = await User.findByIdAndUpdate(
         {

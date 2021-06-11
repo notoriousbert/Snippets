@@ -32,17 +32,18 @@ export default function Post({
   const [validated, setValidated] = useState(false);
   const [stateComments, setStateComments] = useState(comments);
   const router = useRouter();
+  
   const {
     state: { user },
   } = useProvideAuth();
+
   const [likedState, setLiked] = useState(likes.includes(user.uid));
   const [likesState, setLikes] = useState(likes.length);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDeleteToast, setShowDeleteToast] = useState(false);
 
   const handleShowDeleteModal = () => setShowDeleteModal(true);
   const handleCloseDeleteModal = () => setShowDeleteModal(false);
-  const toggleDeleteToast = () => setShowDeleteToast(!showDeleteToast);
+
 
   const handleInputChange = (event) => {
     setData({

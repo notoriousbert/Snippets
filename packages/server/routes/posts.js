@@ -61,7 +61,6 @@ router.get('/:id', async (request, response) => {
 })
 
 router.delete('/:id', requireAuth, async (request, response, next) => {
-  console.log('got here')
   const { user } = request
   const { id } = request.params
   const post = await Post.findById(id)
@@ -72,7 +71,6 @@ router.delete('/:id', requireAuth, async (request, response, next) => {
     return response.status(422).json({ error: 'Cannot find post' })
   }
   if (post.author._id.toString() === user._id.toJSON()) {
-    console.log('got to endpoint')
     try {
       const removedPost = await post.remove()
 
