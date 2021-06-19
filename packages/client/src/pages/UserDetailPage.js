@@ -7,7 +7,7 @@ import {
   Collapse,
   Figure,
 } from "react-bootstrap";
-import { LoadingSpinner, Post } from "components";
+import { LoadingSpinner, Post, AvatarPicker } from "components";
 import { useProvideAuth } from "hooks/useAuth";
 import { useRequireAuth } from "hooks/useRequireAuth";
 import axios from "utils/axiosConfig.js";
@@ -18,12 +18,18 @@ export default function UserDetailPage({
     params: { uid },
   },
   history,
+  getUserApp,
+  setCurrentUserFromApp,
+  currentUserFromApp,
+  setProfilePicFromApp
 }) {
   const { state } = useProvideAuth();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
   const [validated, setValidated] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [openPassword, setOpenPassword] = useState(false);
+  const [openProfilePic, setOpenProfilePic] = useState(false);
+  const [profileImage, setProfileImage] = useState();
   const [data, setData] = useState({
     password: "",
     isSubmitting: false,
@@ -34,17 +40,26 @@ export default function UserDetailPage({
     state: { isAuthenticated },
   } = useRequireAuth();
 
+  const getUser = async () => {
+    try {
+      const userResponse = await axios.get(`users/${uid}`);
+      setUser(userResponse.data);
+      setCurrentUserFromApp(userResponse.data)
+      setLoading(false);
+      setProfilePicFromApp(userResponse.data.profile_image)
+      return userResponse.data
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const userResponse = await axios.get(`users/${uid}`);
-        setUser(userResponse.data);
-        setLoading(false);
-      } catch (err) {
-        console.error(err.message);
-      }
-    };
+    getUser();
     isAuthenticated && getUser();
+    if (user) {
+      setProfileImage(user.profile_image);
+      setProfilePicFromApp(user.profile_image)
+    }
   }, [uid, isAuthenticated]);
 
   const handleInputChange = (event) => {
@@ -52,11 +67,12 @@ export default function UserDetailPage({
       ...data,
       [event.target.name]: event.target.value,
     });
-    if (data.password.length > 8 && data.password.length < 20) {
-      setValidated(true)
-      return
+    console.log(event.target.value);
+    if (event.target.value.length >= 8 && event.target.value.length <= 20) {
+      setValidated(true);
+      return;
     }
-    setValidated(false)
+    setValidated(false);
   };
 
   const handleUpdatePassword = async (event) => {
@@ -65,8 +81,12 @@ export default function UserDetailPage({
     const form = event.currentTarget;
 
     // handle invalid or empty form
-    if (form.checkValidity() === false || data.password.length < 8 || data.password.length > 20) {
-      setValidated(false)
+    if (
+      form.checkValidity() === false ||
+      data.password.length < 8 ||
+      data.password.length > 20
+    ) {
+      setValidated(false);
       return;
     }
 
@@ -79,10 +99,12 @@ export default function UserDetailPage({
     try {
       // write code to call edit user endpoint 'users/:id'
       const {
-        user: { uid },
+        user: { uid, username },
       } = state;
+      console.log(username, uid);
       await axios.put(`users/${uid}`, {
         password: data.password,
+        profileImage: profileImage,
       });
 
       // don't forget to update loading state and alert success
@@ -93,14 +115,55 @@ export default function UserDetailPage({
         errorMessage: error.message,
       });
     }
+
     toast.success("Your password has been updated.");
     setLoading(false);
     setData({
       password: "",
       isSubmitting: false,
       errorMessage: null,
-    })
-    setOpen(!open)
+    });
+    setOpenPassword(!openPassword);
+  };
+
+  const handleUpdateProfilePic = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    user.profile_image = profileImage;
+    setProfilePicFromApp(profileImage)
+    setData({
+      ...data,
+      isSubmitting: true,
+      errorMessage: null,
+    });
+
+    try {
+      // write code to call edit user endpoint 'users/:id'
+      const {
+        user: { uid },
+      } = state;
+      console.log(uid);
+      await axios.put(`users/${uid}`, {
+        password: data.password,
+        profileImage: user.profile_image,
+      });
+
+      // don't forget to update loading state and alert success
+    } catch (error) {
+      setData({
+        ...data,
+        isSubmitting: false,
+        errorMessage: error.message,
+      });
+    }
+    toast.success("Your profile image has been updated");
+    setLoading(false);
+    setData({
+      password: "",
+      isSubmitting: false,
+      errorMessage: null,
+    });
+    setOpenProfilePic(!openProfilePic);
   };
 
   if (!isAuthenticated) {
@@ -135,22 +198,65 @@ export default function UserDetailPage({
                 backgroundColor: "white",
               }}
             >
-              <Figure.Image src={user.profile_image} className="w-100 h-100" />
+              <Figure.Image
+                onClick={() =>
+                  state.user.username === uid &&
+                  setOpenProfilePic(!openProfilePic)
+                }
+                src={user.profile_image}
+                className="w-100 h-100"
+              />
             </Figure>
+            {state.user.username === uid && (
+              <div
+                className="mb-2 mt-1"
+                onClick={() => setOpenProfilePic(!openProfilePic)}
+                style={{ cursor: "pointer", color: "#BFBFBF" }}
+                aria-expanded={openProfilePic}
+              >
+                Change Profile Image
+              </div>
+            )}
+            <Collapse in={openProfilePic}>
+              <Container animation="false" className="pb-4">
+                <Form
+                  id="profileImage"
+                  noValidate
+                  validated={validated}
+                  onSubmit={handleUpdateProfilePic}
+                >
+                  <AvatarPicker
+                    setProfileImage={setProfileImage}
+                    getUser={getUser}
+                    setCurrentUserFromApp={setCurrentUserFromApp}
+                    currentUserFromApp={currentUserFromApp}
+                    setProfilePicFromApp={setProfilePicFromApp}
+                  />
+                  <Button type="submit" disabled={data.isSubmitting}>
+                    {data.isSubmitting ? (
+                      <LoadingSpinner />
+                    ) : (
+                      "Update Profile Image"
+                    )}
+                  </Button>
+                </Form>
+              </Container>
+            </Collapse>
             <Card.Title>{uid}</Card.Title>
             {state.user.username === uid && (
               <div
-                onClick={() => setOpen(!open)}
+                onClick={() => setOpenPassword(!openPassword)}
                 style={{ cursor: "pointer", color: "#BFBFBF" }}
               >
                 Edit Password
               </div>
             )}
-            <Collapse in={open}>
+            <Collapse in={openPassword}>
               <Container animation="false">
                 <div className="row justify-content-center p-4">
                   <div className="col text-center">
                     <Form
+                      id="password"
                       noValidate
                       validated={validated}
                       onSubmit={handleUpdatePassword}
@@ -165,7 +271,10 @@ export default function UserDetailPage({
                           value={data.password}
                           onChange={handleInputChange}
                         />
-                        <Form.Control.Feedback type="invalid" className="text-warning">
+                        <Form.Control.Feedback
+                          type="invalid"
+                          className="text-warning"
+                        >
                           New Password is required
                         </Form.Control.Feedback>
                         <Form.Text id="passwordHelpBlock" muted>
@@ -176,14 +285,18 @@ export default function UserDetailPage({
                       {data.errorMessage && (
                         <span className="form-error">{data.errorMessage}</span>
                       )}
-                      <Button type="submit" disabled={data.isSubmitting} >
-                        {data.isSubmitting ? <LoadingSpinner /> : "Update"}
+                      <Button type="submit" disabled={data.isSubmitting}>
+                        {data.isSubmitting ? (
+                          <LoadingSpinner />
+                        ) : (
+                          "Update Password"
+                        )}
                       </Button>
                     </Form>
                   </div>
                 </div>
               </Container>
-              </Collapse>
+            </Collapse>
           </Card.Body>
         </Card>
       </Container>

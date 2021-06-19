@@ -20,7 +20,7 @@ const initialStateForSearch = {
   errorMessage: null,
 };
 
-export default function Feed() {
+export default function Feed(props) {
   const {
     state: { user },
   } = useProvideAuth();
@@ -34,6 +34,7 @@ export default function Feed() {
   const [validated, setValidated] = useState(false);
 
   const handleInputChange = (event) => {
+    console.log(props)
     setData({
       ...data,
       [event.target.name]: event.target.value,

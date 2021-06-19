@@ -12,6 +12,7 @@ router.route('/').get((req, res, next) => {
 
 router.post('/signup', async (req, res) => {
   const { username, password, profile_image } = req.body
+  console.log(profile_image)
 
   if (!password || !username) {
     return res.status(422).json({ error: 'please add all the fields' })
@@ -68,6 +69,7 @@ router.post('/signin', async (req, res) => {
   }
 
   const token = jwt.sign(userForToken, keys.jwt.secret)
+  console.log(token)
   res
     .status(200)
     .send({ token, username, uid: user.id, profile_image: user.profile_image })
