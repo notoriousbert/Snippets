@@ -27,6 +27,7 @@ export default function Post({
   detail,
   userDetail,
   getPosts,
+  profilePicFromApp
 }) {
   const [data, setData] = useState(initialState);
   const [validated, setValidated] = useState(false);
@@ -142,7 +143,7 @@ export default function Post({
               style={{ height: "50px", width: "50px", marginTop: "0px" }}
             >
               <Figure.Image
-                src={author.profile_image}
+                src={profilePicFromApp}
                 className="w-100 h-100"
               />
             </Figure>

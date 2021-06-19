@@ -20,7 +20,7 @@ function App() {
   } = useProvideAuth();
 
   const [currentUserFromApp, setCurrentUserFromApp] = useState();
-  const [profilePicFromApp, setProfilePicFromApp] = useState()
+  const [profilePicFromApp, setProfilePicFromApp] = useState();
 
   useEffect(() => {
     if (user) {
@@ -33,7 +33,10 @@ function App() {
       <ToastContainer />
       {user ? (
         <>
-          <Header currentUserFromApp={currentUserFromApp} profilePicFromApp={profilePicFromApp} />
+          <Header
+            currentUserFromApp={currentUserFromApp}
+            profilePicFromApp={profilePicFromApp}
+          />
           <Container
             fluid
             style={{
@@ -54,6 +57,7 @@ function App() {
                         setCurrentUserFromApp={setCurrentUserFromApp}
                         currentUserFromApp={currentUserFromApp}
                         setProfilePicFromApp={setProfilePicFromApp}
+                        profilePicFromApp={profilePicFromApp}
                       />
                     )}
                   />
@@ -61,7 +65,9 @@ function App() {
                   <Route
                     exact
                     path="/"
-                    render={(props) => <Feed {...props} />}
+                    render={(props) => (
+                      <Feed {...props} profilePicFromApp={profilePicFromApp} />
+                    )}
                   />
                   <Route exact path="/login">
                     <Redirect to="/" />
@@ -94,7 +100,16 @@ function App() {
       ) : (
         <Switch>
           <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/register" render={(props) => <RegisterPage {...props} setProfilePicFromApp={setProfilePicFromApp}/>} />
+          <Route
+            exact
+            path="/register"
+            render={(props) => (
+              <RegisterPage
+                {...props}
+                setProfilePicFromApp={setProfilePicFromApp}
+              />
+            )}
+          />
           <Route path="/" component={LandingPage} />
         </Switch>
       )}

@@ -21,7 +21,8 @@ export default function UserDetailPage({
   getUserApp,
   setCurrentUserFromApp,
   currentUserFromApp,
-  setProfilePicFromApp
+  setProfilePicFromApp,
+  profilePicFromApp
 }) {
   const { state } = useProvideAuth();
   const [user, setUser] = useState();
@@ -303,7 +304,7 @@ export default function UserDetailPage({
       <Container className="pt-3 pb-3">
         {user.posts.length !== 0 ? (
           user.posts.map((post) => (
-            <Post key={post._id} post={post} userDetail />
+            <Post key={post._id} post={post} userDetail profilePicFromApp={profilePicFromApp} />
           ))
         ) : (
           <div

@@ -34,7 +34,7 @@ router
     const hashedpassword = await bcrypt.hash(password, 12);
     if (password.length > 0) {
       try {
-        console.log("inside the put " + id);
+        console.log("inside the put for password " + id);
         const userUpdate = await User.findByIdAndUpdate(
           id,
           {
