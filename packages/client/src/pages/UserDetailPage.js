@@ -22,17 +22,29 @@ export default function UserDetailPage({
   setCurrentUserFromApp,
   currentUserFromApp,
   setProfilePicFromApp,
-  profilePicFromApp
+  profilePicFromApp,
 }) {
   const { state } = useProvideAuth();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
-  const [validated, setValidated] = useState(false);
+  const [validatedCurrent, setValidatedCurrent] = useState(false);
+  const [validatedNew, setValidatedNew] = useState(false);
+  const [validatedConfirm, setValidatedConfirm] = useState(false);
   const [openPassword, setOpenPassword] = useState(false);
   const [openProfilePic, setOpenProfilePic] = useState(false);
   const [profileImage, setProfileImage] = useState();
-  const [data, setData] = useState({
-    password: "",
+  const [newPasswordData, setNewPasswordData] = useState({
+    newPassword: "",
+    isSubmitting: false,
+    errorMessage: null,
+  });
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState({
+    newPasswordConfirm: "",
+    isSubmitting: false,
+    errorMessage: null,
+  });
+  const [currentPasswordData, setCurrentPasswordData] = useState({
+    currentPassword: "",
     isSubmitting: false,
     errorMessage: null,
   });
@@ -41,16 +53,14 @@ export default function UserDetailPage({
     state: { isAuthenticated },
   } = useRequireAuth();
 
-  
-
   const getUser = async () => {
     try {
       const userResponse = await axios.get(`users/${uid}`);
       setUser(userResponse.data);
-      setCurrentUserFromApp(userResponse.data)
+      setCurrentUserFromApp(userResponse.data);
       setLoading(false);
-      setProfilePicFromApp(userResponse.data.profile_image)
-      return userResponse.data
+      setProfilePicFromApp(userResponse.data.profile_image);
+      return userResponse.data;
     } catch (err) {
       console.error(err.message);
     }
@@ -61,20 +71,42 @@ export default function UserDetailPage({
     isAuthenticated && getUser();
     if (user) {
       setProfileImage(user.profile_image);
-      setProfilePicFromApp(user.profile_image)
+      setProfilePicFromApp(user.profile_image);
     }
   }, [uid, isAuthenticated]);
 
   const handleInputChange = (event) => {
-    setData({
-      ...data,
-      [event.target.name]: event.target.value,
-    });
-    if (event.target.value.length >= 8 && event.target.value.length <= 20) {
-      setValidated(true);
-      return;
+    if (event.target.name === "newPassword") {
+      setNewPasswordData({
+        ...newPasswordData,
+        [event.target.name]: event.target.value,
+      });
+      if (event.target.value.length >= 8 && event.target.value.length <= 20) {
+        setValidatedNew(true);
+        return;
+      }
+      setValidatedNew(false);
+    } else if (event.target.name === "currentPassword") {
+      setCurrentPasswordData({
+        ...currentPasswordData,
+        [event.target.name]: event.target.value,
+      });
+      if (event.target.value.length >= 8 && event.target.value.length <= 20) {
+        setValidatedCurrent(true);
+        return;
+      }
+      setValidatedCurrent(false);
+    } else {
+      setNewPasswordConfirm({
+        ...newPasswordConfirm,
+        [event.target.name]: event.target.value,
+      });
+      if (event.target.value.length >= 8 && event.target.value.length <= 20) {
+        setValidatedConfirm(true);
+        return;
+      }
+      setValidatedConfirm(false);
     }
-    setValidated(false);
   };
 
   const handleUpdatePassword = async (event) => {
@@ -82,18 +114,21 @@ export default function UserDetailPage({
     event.stopPropagation();
     const form = event.currentTarget;
 
-    // handle invalid or empty form
-    if (
-      form.checkValidity() === false ||
-      data.password.length < 8 ||
-      data.password.length > 20
-    ) {
-      setValidated(false);
+    if (newPasswordData.newPassword !== newPasswordConfirm.newPasswordConfirm) {
+      toast.error(
+        `'New Password' and 'Confirm New Password' input fields do not match`
+      );
       return;
     }
 
-    setData({
-      ...data,
+    // handle invalid or empty form
+    if (form.checkValidity() === false) {
+      setValidatedNew(false);
+      return;
+    }
+
+    setNewPasswordData({
+      ...newPasswordData,
       isSubmitting: true,
       errorMessage: null,
     });
@@ -105,23 +140,25 @@ export default function UserDetailPage({
       } = state;
       console.log(username, uid);
       await axios.put(`users/${uid}`, {
-        password: data.password,
+        currentPassword: currentPasswordData.currentPassword,
+        newPassword: newPasswordData.newPassword,
         profileImage: profileImage,
       });
+      toast.success("Your password has been updated.");
 
       // don't forget to update loading state and alert success
     } catch (error) {
-      setData({
-        ...data,
+      setNewPasswordData({
+        ...newPasswordData,
         isSubmitting: false,
-        errorMessage: error.message,
+        errorMessage: error ? error.message || error.statusText : null,
       });
+      toast.error(error.response.data.error);
     }
 
-    toast.success("Your password has been updated.");
     setLoading(false);
-    setData({
-      password: "",
+    setNewPasswordData({
+      newPassword: "",
       isSubmitting: false,
       errorMessage: null,
     });
@@ -132,9 +169,9 @@ export default function UserDetailPage({
     event.preventDefault();
     event.stopPropagation();
     user.profile_image = profileImage;
-    setProfilePicFromApp(profileImage)
-    setData({
-      ...data,
+    setProfilePicFromApp(profileImage);
+    setNewPasswordData({
+      ...newPasswordData,
       isSubmitting: true,
       errorMessage: null,
     });
@@ -146,22 +183,23 @@ export default function UserDetailPage({
       } = state;
       console.log(uid);
       await axios.put(`users/${uid}`, {
-        password: data.password,
-        profileImage: user.profile_image,
+        currentPassword: "",
+        newPassword: "",
+        profileImage: profileImage,
       });
 
       // don't forget to update loading state and alert success
     } catch (error) {
-      setData({
-        ...data,
+      setNewPasswordData({
+        ...newPasswordData,
         isSubmitting: false,
         errorMessage: error.message,
       });
     }
     toast.success("Your profile image has been updated");
     setLoading(false);
-    setData({
-      password: "",
+    setNewPasswordData({
+      newPassword: "",
       isSubmitting: false,
       errorMessage: null,
     });
@@ -173,7 +211,6 @@ export default function UserDetailPage({
   }
 
   if (loading) {
-    console.log(loading);
     return <LoadingSpinner full />;
   }
 
@@ -224,7 +261,7 @@ export default function UserDetailPage({
                 <Form
                   id="profileImage"
                   noValidate
-                  validated={validated}
+                  // validated={validated}
                   onSubmit={handleUpdateProfilePic}
                 >
                   <AvatarPicker
@@ -234,8 +271,8 @@ export default function UserDetailPage({
                     currentUserFromApp={currentUserFromApp}
                     setProfilePicFromApp={setProfilePicFromApp}
                   />
-                  <Button type="submit" disabled={data.isSubmitting}>
-                    {data.isSubmitting ? (
+                  <Button type="submit" disabled={newPasswordData.isSubmitting}>
+                    {newPasswordData.isSubmitting ? (
                       <LoadingSpinner />
                     ) : (
                       "Update Profile Image"
@@ -260,17 +297,43 @@ export default function UserDetailPage({
                     <Form
                       id="password"
                       noValidate
-                      validated={validated}
+                      validated={
+                        validatedNew && validatedCurrent && validatedConfirm
+                      }
                       onSubmit={handleUpdatePassword}
                     >
                       <Form.Group>
-                        <Form.Label htmlFor="password">New Password</Form.Label>
+                        <Form.Label htmlFor="password" className="mt-2">
+                          Current Password
+                        </Form.Label>
                         <Form.Control
-                          isInvalid={!validated}
+                          isInvalid={!validatedCurrent}
                           type="password"
-                          name="password"
+                          name="currentPassword"
                           required
-                          value={data.password}
+                          value={currentPasswordData.currentPassword}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="password" className="mt-2">
+                          New Password
+                        </Form.Label>
+                        <Form.Control
+                          isInvalid={!validatedNew}
+                          type="password"
+                          name="newPassword"
+                          required
+                          value={newPasswordData.newPassword}
+                          onChange={handleInputChange}
+                        />
+                        <Form.Label htmlFor="password" className="mt-2">
+                          Confirm New Password
+                        </Form.Label>
+                        <Form.Control
+                          isInvalid={!validatedConfirm}
+                          type="password"
+                          name="newPasswordConfirm"
+                          required
+                          value={newPasswordConfirm.newPassword}
                           onChange={handleInputChange}
                         />
                         <Form.Control.Feedback
@@ -284,11 +347,16 @@ export default function UserDetailPage({
                         </Form.Text>
                       </Form.Group>
 
-                      {data.errorMessage && (
-                        <span className="form-error">{data.errorMessage}</span>
+                      {newPasswordData.errorMessage && (
+                        <span className="form-error">
+                          {newPasswordData.errorMessage}
+                        </span>
                       )}
-                      <Button type="submit" disabled={data.isSubmitting}>
-                        {data.isSubmitting ? (
+                      <Button
+                        type="submit"
+                        disabled={newPasswordData.isSubmitting}
+                      >
+                        {newPasswordData.isSubmitting ? (
                           <LoadingSpinner />
                         ) : (
                           "Update Password"
@@ -305,7 +373,12 @@ export default function UserDetailPage({
       <Container className="pt-3 pb-3">
         {user.posts.length !== 0 ? (
           user.posts.map((post) => (
-            <Post key={post._id} post={post} userDetail profilePicFromApp={profilePicFromApp} />
+            <Post
+              key={post._id}
+              post={post}
+              userDetail
+              profilePicFromApp={profilePicFromApp}
+            />
           ))
         ) : (
           <div

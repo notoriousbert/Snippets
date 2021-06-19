@@ -12,10 +12,12 @@ import useRouter from "hooks/useRouter";
 import { useProvideAuth } from "hooks/useAuth";
 import { LandingHeader, LoadingSpinner, AvatarPicker } from "components";
 import { setAuthToken } from "utils/axiosConfig";
+import { toast } from "react-toastify";
 
 const initialState = {
   username: "",
   password: "",
+  confirmPassword: "",
   isSubmitting: false,
   errorMessage: null,
 };
@@ -55,6 +57,11 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
     event.preventDefault();
     event.stopPropagation();
 
+    if (data.password !== data.confirmPassword) {
+      toast.error(`Error: Password does not match Confirm Password`)
+      return 
+    }
+
     if (form.checkValidity() === false) {
     }
 
@@ -75,6 +82,7 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
       setAuthToken(res.token);
       router.push("/");
     } catch (error) {
+      console.log(error)
       setData({
         ...data,
         isSubmitting: false,
@@ -126,6 +134,15 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
                 required
                 id="inputPasswordRegister"
                 value={data.password}
+                onChange={handleInputChange}
+              />
+              <Form.Label htmlFor="Register">Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirmPassword"
+                required
+                id="inputPasswordRegisterConfirm"
+                value={data.confirmPassword}
                 onChange={handleInputChange}
               />
             </Form.Group>

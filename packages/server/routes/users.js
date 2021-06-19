@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { User } from "../models";
+import { requireAuth } from '../middleware'
 
 const router = express.Router();
 
@@ -25,20 +26,37 @@ router
       response.status(404).end();
     }
   })
-  .put(async (request, response) => {
-    const { password, profileImage } = request.body;
+  .put(requireAuth, async (request, response) => {
+    const { currentPassword, newPassword, profileImage } = request.body;
     const { id } = request.params;
+    const thisUser = await User.findById(id);
 
-    console.log(profileImage);
+    if (newPassword.length > 0 && currentPassword.length > 0) {
+      const passwordCorrect = await bcrypt.compare(
+        currentPassword,
+        thisUser.passwordHash
+      );
+      console.log("passwordCorrect: " + passwordCorrect);
 
-    const hashedpassword = await bcrypt.hash(password, 12);
-    if (password.length > 0) {
+      if (newPassword.length < 8 || newPassword.length > 20) {
+        return response.status(400).json({ error: 'Password must be 8 - 20 characters long' })
+      }
+
+      if (!(thisUser && passwordCorrect)) {
+        console.log("invalid password");
+        return response.status(401).json({
+          error: "invalid password",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
       try {
         console.log("inside the put for password " + id);
         const userUpdate = await User.findByIdAndUpdate(
           id,
           {
-            passwordHash: hashedpassword,
+            passwordHash: hashedPassword,
           },
           // {
           //   profile_image: profileImage,

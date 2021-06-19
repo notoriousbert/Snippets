@@ -12,7 +12,10 @@ router.route('/').get((req, res, next) => {
 
 router.post('/signup', async (req, res) => {
   const { username, password, profile_image } = req.body
-  console.log(profile_image)
+
+  if (password.length < 8 || password.length > 20) {
+    return res.status(400).json({ error: 'Password must be 8 - 20 characters long' })
+  }
 
   if (!password || !username) {
     return res.status(422).json({ error: 'please add all the fields' })
