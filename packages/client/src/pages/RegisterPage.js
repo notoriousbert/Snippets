@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 const initialState = {
   username: "",
   password: "",
+  email: "",
   confirmPassword: "",
   isSubmitting: false,
   errorMessage: null,
@@ -72,7 +73,8 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
     });
 
     try {
-      const res = await auth.signup(data.username, data.password, profileImage);
+      console.log(data.email)
+      const res = await auth.signup(data.username, data.password, profileImage, data.email);
       setProfilePicFromApp(profileImage)
       setData({
         ...data,
@@ -127,6 +129,15 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
               setProfileImage={setProfileImage}
             />
             <Form.Group>
+            <Form.Label htmlFor="Register">Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                required
+                id="email"
+                value={data.email}
+                onChange={handleInputChange}
+              />
               <Form.Label htmlFor="Register">Password</Form.Label>
               <Form.Control
                 type="password"

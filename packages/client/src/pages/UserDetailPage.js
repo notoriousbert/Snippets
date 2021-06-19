@@ -60,7 +60,6 @@ export default function UserDetailPage({
       setCurrentUserFromApp(userResponse.data);
       setLoading(false);
       setProfilePicFromApp(userResponse.data.profile_image);
-      return userResponse.data;
     } catch (err) {
       console.error(err.message);
     }
@@ -246,6 +245,8 @@ export default function UserDetailPage({
                 className="w-100 h-100"
               />
             </Figure>
+            <Card.Title>{uid}</Card.Title>
+            <Card.Title>{user.email}</Card.Title>
             {state.user.username === uid && (
               <div
                 className="mb-2 mt-1"
@@ -281,7 +282,6 @@ export default function UserDetailPage({
                 </Form>
               </Container>
             </Collapse>
-            <Card.Title>{uid}</Card.Title>
             {state.user.username === uid && (
               <div
                 onClick={() => setOpenPassword(!openPassword)}
