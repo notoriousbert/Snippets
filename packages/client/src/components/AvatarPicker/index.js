@@ -25,10 +25,12 @@ export default function AvatarPicker(props) {
     "/tiger.svg",
     "/whale.svg",
   ];
+  
 
   const avatarSelector = (event) => {
     setPickedAvatar(event.target.name);
     props.setProfileImage(event.target.name)
+    props.getUser()
   };
 
   const displayChoosableAvatar = () => {

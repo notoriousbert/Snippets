@@ -143,7 +143,7 @@ export default function Post({
               style={{ height: "50px", width: "50px", marginTop: "0px" }}
             >
               <Figure.Image
-                src={profilePicFromApp}
+                src={profilePicFromApp ? profilePicFromApp : author.profile_image}
                 className="w-100 h-100"
               />
             </Figure>

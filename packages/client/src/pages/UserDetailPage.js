@@ -41,6 +41,8 @@ export default function UserDetailPage({
     state: { isAuthenticated },
   } = useRequireAuth();
 
+  
+
   const getUser = async () => {
     try {
       const userResponse = await axios.get(`users/${uid}`);
@@ -68,7 +70,6 @@ export default function UserDetailPage({
       ...data,
       [event.target.name]: event.target.value,
     });
-    console.log(event.target.value);
     if (event.target.value.length >= 8 && event.target.value.length <= 20) {
       setValidated(true);
       return;

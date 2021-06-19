@@ -182,14 +182,14 @@ export default function Feed(props) {
           {posts && queryEntered
             ? filteredPosts.map((post) => {
                 if (post) {
-                  return <Post key={post._id} post={post} profilePicFromApp={props.profilePicFromApp} />;
+                  return <Post key={post._id} post={post} />;
                 }
                 return null;
               })
             : posts.map((post) => {
                 if (post) {
                   return (
-                    <Post key={post._id} post={post} getPosts={getPosts} profilePicFromApp={props.profilePicFromApp} />
+                    <Post key={post._id} post={post} getPosts={getPosts} />
                   );
                 }
                 return null;
