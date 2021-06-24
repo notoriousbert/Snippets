@@ -56,22 +56,26 @@ export default function UserDetailPage({
   const getUser = async () => {
     try {
       const userResponse = await axios.get(`users/${uid}`);
+      console.log(userResponse)
       setUser(userResponse.data);
-      setCurrentUserFromApp(userResponse.data);
       setLoading(false);
-      setProfilePicFromApp(userResponse.data.profile_image);
+      if (state.user.username === userResponse.data.username) {
+        setProfileImage(userResponse.data.profile_image)
+        setCurrentUserFromApp(userResponse.data);
+        setProfilePicFromApp(userResponse.data.profile_image);
+      }
     } catch (err) {
       console.error(err.message);
     }
   };
 
   useEffect(() => {
-    getUser();
     isAuthenticated && getUser();
-    if (user) {
-      setProfileImage(user.profile_image);
-      setProfilePicFromApp(user.profile_image);
-    }
+    console.log(state)
+    // if (user) {
+    //   setProfileImage(user.profile_image);
+    //   setProfilePicFromApp(user.profile_image);
+    // }
   }, [uid, isAuthenticated]);
 
   const handleInputChange = (event) => {
@@ -271,6 +275,7 @@ export default function UserDetailPage({
                     setCurrentUserFromApp={setCurrentUserFromApp}
                     currentUserFromApp={currentUserFromApp}
                     setProfilePicFromApp={setProfilePicFromApp}
+                    state={state}
                   />
                   <Button type="submit" disabled={newPasswordData.isSubmitting}>
                     {newPasswordData.isSubmitting ? (
@@ -376,8 +381,9 @@ export default function UserDetailPage({
             <Post
               key={post._id}
               post={post}
+              // getPosts={getUser}
               userDetail
-              profilePicFromApp={profilePicFromApp}
+              userFromDetailPage={user}
             />
           ))
         ) : (

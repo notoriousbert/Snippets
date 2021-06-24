@@ -66,7 +66,11 @@ function App() {
                     exact
                     path="/"
                     render={(props) => (
-                      <Feed {...props} profilePicFromApp={profilePicFromApp} />
+                      <Feed
+                        {...props}
+                        profilePicFromApp={profilePicFromApp}
+                        setProfilePicFromApp={setProfilePicFromApp}
+                      />
                     )}
                   />
                   <Route exact path="/login">

@@ -7,6 +7,7 @@ import { useProvideAuth } from "hooks/useAuth";
 import { toast } from "react-toastify";
 import Fuse from "fuse.js";
 import { queries } from "@testing-library/dom";
+import { UserDetailPage } from "pages";
 
 const initialState = {
   postText: "",
@@ -24,6 +25,7 @@ export default function Feed(props) {
   const {
     state: { user },
   } = useProvideAuth();
+  const { state } = useProvideAuth();
   const [queryEntered, setQueryEntered] = useState(false);
   const [posts, setPosts] = useState(null);
   const [filteredPosts, setFilteredPosts] = useState([]);
@@ -119,6 +121,7 @@ export default function Feed(props) {
       const allPosts = await axios.get("posts");
       setPosts(allPosts.data);
       setPostLoading(false);
+      console.log(user)
     } catch (err) {
       console.error(err.message);
       setPostLoading(false);
@@ -126,8 +129,25 @@ export default function Feed(props) {
     }
   };
 
+  const getUser = async () => {
+    try {
+      const userResponse = await axios.get(`users/${user.username}`);
+      console.log(userResponse)
+      console.log(state)
+      console.log(user)
+      console.log(props)
+      if (state.user.username === userResponse.data.username) {
+        props.setProfilePicFromApp(userResponse.data.profile_image);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+  
+  }
+
   useEffect(() => {
     getPosts();
+    getUser()
   }, []);
 
   return (

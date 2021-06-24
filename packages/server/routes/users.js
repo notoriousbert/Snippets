@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { User } from "../models";
-import { requireAuth } from '../middleware'
+import { requireAuth } from "../middleware";
 
 const router = express.Router();
 
@@ -11,16 +11,18 @@ router
     const populateQuery = [
       {
         path: "posts",
-        populate: { path: "author", select: ["username", "profile_image"] },
+        populate: [
+          { path: "author", select: ["username", "profile_image"] },
+          { path: "likes", select: ["username", "profile_image"] },
+        ],
       },
     ];
 
     const user = await User.findOne({ username: request.params.id })
       .populate(populateQuery)
       .exec();
-    console.log("found user" + user);
+    console.log("found user: " + user);
     if (user) {
-      console.log("found user it worked");
       response.json(user.toJSON());
     } else {
       response.status(404).end();
@@ -39,7 +41,9 @@ router
       console.log("passwordCorrect: " + passwordCorrect);
 
       if (newPassword.length < 8 || newPassword.length > 20) {
-        return response.status(400).json({ error: 'Password must be 8 - 20 characters long' })
+        return response
+          .status(400)
+          .json({ error: "Password must be 8 - 20 characters long" });
       }
 
       if (!(thisUser && passwordCorrect)) {

@@ -75,6 +75,7 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
     try {
       console.log(data.email)
       const res = await auth.signup(data.username, data.password, profileImage, data.email);
+      console.log(res)
       setProfilePicFromApp(profileImage)
       setData({
         ...data,

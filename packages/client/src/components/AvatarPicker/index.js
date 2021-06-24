@@ -28,8 +28,12 @@ export default function AvatarPicker(props) {
   
 
   const avatarSelector = (event) => {
+    console.log(props.state)
     setPickedAvatar(event.target.name);
     props.setProfileImage(event.target.name)
+    props.state.user.profile_image = pickedAvatar
+    console.log(props.state)
+    console.log(props.currentUserFromApp)
   };
 
   const displayChoosableAvatar = () => {

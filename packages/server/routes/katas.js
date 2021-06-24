@@ -11,6 +11,7 @@ router.route("/").get((req, res, next) => {
 
 router.get("/alice", async (request, response) => {
   const user = await User.findOne({ username: "alice" });
+  console.log(user)
   try {
     if (user) {
       response.status(200).json(user.toJSON());

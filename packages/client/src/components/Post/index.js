@@ -8,6 +8,8 @@ import {
   Figure,
   ListGroup,
   Modal,
+  Tooltip,
+  OverlayTrigger,
 } from "react-bootstrap";
 import useRouter from "hooks/useRouter";
 import { useProvideAuth } from "hooks/useAuth";
@@ -22,29 +24,34 @@ const initialState = {
   isSubmitting: false,
   errorMessage: null,
 };
+
 export default function Post({
   post: { _id, author, profile_image, text, comments, created, likes },
   detail,
   userDetail,
   getPosts,
-  profilePicFromApp
+  userFromDetailPage,
+  profilePicFromApp,
 }) {
+
+  const likesInStringForm = likes.map((like) => like['_id'].toString())
   const [data, setData] = useState(initialState);
   const [validated, setValidated] = useState(false);
   const [stateComments, setStateComments] = useState(comments);
   const router = useRouter();
-  
+
   const {
     state: { user },
   } = useProvideAuth();
 
-  const [likedState, setLiked] = useState(likes.includes(user.uid));
+  const [stateLikes, setStateLikes] = useState(likes);
+  const [userLikeData, setUserLikeData] = useState(null);
+  const [likedState, setLiked] = useState(likesInStringForm.includes(user.uid));
   const [likesState, setLikes] = useState(likes.length);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleShowDeleteModal = () => setShowDeleteModal(true);
   const handleCloseDeleteModal = () => setShowDeleteModal(false);
-
 
   const handleInputChange = (event) => {
     setData({
@@ -53,12 +60,26 @@ export default function Post({
     });
   };
 
+  // const getUser = async () => {
+  //   try {
+  //     const userResponse = await axios.get(`users/${user.username}`);
+  //     setUserLikeData(userResponse.data);
+  //   } catch (err) {
+  //     console.error(err.message);
+  //   }
+  // };
+
   const handleToggleLike = async () => {
+    // console.log(likes)
     if (!likedState) {
       setLiked(true);
       setLikes(likesState + 1);
       try {
-        await axios.post(`posts/like/${_id}`);
+        // const userResponse = await axios.get(`users/${user.username}`);
+        // setUserLikeData(userResponse.data);
+        await axios.post(`posts/like/${_id}`)
+        getPosts();
+        setStateLikes(likes);
       } catch (error) {
         console.log(error);
         return error;
@@ -67,12 +88,18 @@ export default function Post({
       setLiked(false);
       setLikes(likesState - 1);
       try {
+        // const userResponse = await axios.get(`users/${user.username}`);
+        // setUserLikeData(userResponse.data);
+        // console.log(userResponse.data)
         await axios.post(`posts/like/${_id}`);
+        getPosts();
+        setStateLikes(likes);
       } catch (error) {
         console.log(error);
         return error;
       }
     }
+    console.log(userLikeData);
   };
 
   // Complete function to call server endpoint /posts/:id
@@ -127,7 +154,27 @@ export default function Post({
 
   useEffect(() => {
     setStateComments(comments);
-  }, [comments]);
+    setStateLikes(likes);
+    // getUser()
+  }, [comments, likes]);
+
+  const renderNamesForLikesTooltip = (props) => {
+    let listOfUserNames = ``;
+
+    stateLikes.forEach((uniqueLike, index) => {
+      if (index + 1 === stateLikes.length) {
+        listOfUserNames += uniqueLike.username;
+      } else {
+        listOfUserNames += `${uniqueLike.username}, `;
+      }
+    });
+
+    return (
+      <Tooltip id="button-tooltip" {...props}>
+        {listOfUserNames.length > 0 ? listOfUserNames : "No likes yet"}
+      </Tooltip>
+    );
+  };
 
   return (
     <>
@@ -143,7 +190,9 @@ export default function Post({
               style={{ height: "50px", width: "50px", marginTop: "0px" }}
             >
               <Figure.Image
-                src={profilePicFromApp ? profilePicFromApp : author.profile_image}
+                src={
+                  profilePicFromApp ? profilePicFromApp : author.profile_image
+                }
                 className="w-100 h-100"
               />
             </Figure>
@@ -186,9 +235,15 @@ export default function Post({
                   likedState ? "isLiked" : ""
                 }`}
               >
-                <Button variant="link" size="md" onClick={handleToggleLike}>
-                  {likedState ? <LikeIconFill /> : <LikeIcon />}
-                </Button>
+                <OverlayTrigger
+                  placement="right"
+                  delay={{ show: 250, hide: 400 }}
+                  overlay={renderNamesForLikesTooltip}
+                >
+                  <Button variant="link" size="md" onClick={handleToggleLike}>
+                    {likedState ? <LikeIconFill /> : <LikeIcon />}
+                  </Button>
+                </OverlayTrigger>
                 <span>{likesState}</span>
               </div>
 
