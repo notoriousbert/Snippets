@@ -56,7 +56,6 @@ export default function UserDetailPage({
   const getUser = async () => {
     try {
       const userResponse = await axios.get(`users/${uid}`);
-      console.log(userResponse)
       setUser(userResponse.data);
       setLoading(false);
       if (state.user.username === userResponse.data.username) {
@@ -381,7 +380,7 @@ export default function UserDetailPage({
             <Post
               key={post._id}
               post={post}
-              // getPosts={getUser}
+              getPosts={getUser}
               userDetail
               userFromDetailPage={user}
             />

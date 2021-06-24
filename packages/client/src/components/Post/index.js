@@ -45,7 +45,6 @@ export default function Post({
   } = useProvideAuth();
 
   const [stateLikes, setStateLikes] = useState(likes);
-  const [userLikeData, setUserLikeData] = useState(null);
   const [likedState, setLiked] = useState(likesInStringForm.includes(user.uid));
   const [likesState, setLikes] = useState(likes.length);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -60,23 +59,12 @@ export default function Post({
     });
   };
 
-  // const getUser = async () => {
-  //   try {
-  //     const userResponse = await axios.get(`users/${user.username}`);
-  //     setUserLikeData(userResponse.data);
-  //   } catch (err) {
-  //     console.error(err.message);
-  //   }
-  // };
-
   const handleToggleLike = async () => {
     // console.log(likes)
     if (!likedState) {
       setLiked(true);
       setLikes(likesState + 1);
       try {
-        // const userResponse = await axios.get(`users/${user.username}`);
-        // setUserLikeData(userResponse.data);
         await axios.post(`posts/like/${_id}`)
         getPosts();
         setStateLikes(likes);
@@ -88,9 +76,6 @@ export default function Post({
       setLiked(false);
       setLikes(likesState - 1);
       try {
-        // const userResponse = await axios.get(`users/${user.username}`);
-        // setUserLikeData(userResponse.data);
-        // console.log(userResponse.data)
         await axios.post(`posts/like/${_id}`);
         getPosts();
         setStateLikes(likes);
@@ -99,7 +84,6 @@ export default function Post({
         return error;
       }
     }
-    console.log(userLikeData);
   };
 
   // Complete function to call server endpoint /posts/:id
@@ -155,7 +139,6 @@ export default function Post({
   useEffect(() => {
     setStateComments(comments);
     setStateLikes(likes);
-    // getUser()
   }, [comments, likes]);
 
   const renderNamesForLikesTooltip = (props) => {
@@ -325,7 +308,7 @@ export default function Post({
                       style={{ height: "40px", width: "40px" }}
                     />
                   </Figure>
-                  <span>{c.text}</span>
+                  <span>{timeSince(c.created)} ago {c.text}</span>
                 </div>
               ))}
             </Container>

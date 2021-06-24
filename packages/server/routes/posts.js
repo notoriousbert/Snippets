@@ -9,8 +9,10 @@ router.get("/", async (request, response) => {
   const populateQuery = [
     { path: "author", select: ["username", "profile_image"] },
     {
-      path: "comments",
-      populate: { path: "author", select: ["username", "profile_image"] },
+      path: "comments", select : ["created"],
+      populate: [
+        { path: "author", select: ["username", "profile_image"] },
+        ]
     },
     {
       path: "likes",
@@ -72,8 +74,6 @@ router.delete("/:id", requireAuth, async (request, response, next) => {
   const { user } = request;
   const { id } = request.params;
   const post = await Post.findById(id);
-  console.log(post);
-  console.log(user);
 
   if (!post) {
     return response.status(422).json({ error: "Cannot find post" });
@@ -95,61 +95,12 @@ router.delete("/:id", requireAuth, async (request, response, next) => {
 });
 
 router.all("/like/:postId", requireAuth, async (request, response) => {
-  //   const { postId } = request.params;
-  //   const { user } = request;
-
-  //   const newLike = { _id: user.id, username: user.username }
-
-  //   const populateQuery = [
-  //     {
-  //       path: "likes",
-  //       select: ["username"],
-  //     },
-  //   ];
-  //   const post = await Post.findOne({ _id: postId })
-  //     .populate(populateQuery)
-  //     .exec();
-
-  //   if (!post) {
-  //     return response.status(422).json({ error: "Cannot find post" });
-  //   }
-  //   try {
-  //     console.log('HERES THat user: ' + user)
-
-  //     post.likes.some(uniqueLike => {
-  //       console.log(typeof user.id)
-  //       console.log(typeof uniqueLike._id)
-  //       uniqueLike._id === user.id
-  //     })
-  //     console.log("Heres the post:" + post);
-  //     if (post.likes.some(uniqueLike => uniqueLike._id.toString() === user.id)) {
-  //       console.log('made it bby')
-  //       const result = await post.updateOne({
-  //         $pull: { likes: { $elemMatch: { _id: user.id } } },
-  //       });
-  //       console.log('likes subtracted ' + post)
-
-  //       response.json(post);
-  //     } else {
-  //       const result = await post.updateOne({
-  //         $push: { likes: user.id },
-  //       });
-  //       console.log("likes added:" + post);
-  //       response.json(post);
-  //     }
-  //   } catch (err) {
-  //     return response.status(422).json({ error: err });
-  //   }
-  // });
-
   const { postId } = request.params;
   const { user } = request;
 
-  console.log(user)
+  console.log(user);
 
   const post = await Post.findOne({ _id: postId });
-
-  
 
   if (!post) {
     return response.status(422).json({ error: "Cannot find post" });
@@ -159,22 +110,18 @@ router.all("/like/:postId", requireAuth, async (request, response) => {
       const result = await post.updateOne({
         $pull: { likes: user.id },
       });
-      const userUpdate = await user.updateOne(
-        { $pull: { postLikes: postId } }
-      );
+      const userUpdate = await user.updateOne({ $pull: { postLikes: postId } });
 
       response.json(result);
     } else {
       const result = await post.updateOne({
         $push: { likes: user.id },
       });
-      const userUpdate = await user.updateOne(
-        { $push: { postLikes: postId } }
-      );
+      const userUpdate = await user.updateOne({ $push: { postLikes: postId } });
 
       response.json(result);
     }
-    console.log(user)
+    console.log(user);
   } catch (err) {
     return response.status(422).json({ error: err });
   }

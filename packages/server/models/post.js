@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-const { ObjectId } = mongoose.Schema.Types
+import mongoose from "mongoose";
+const { ObjectId } = mongoose.Schema.Types;
 
 const postSchema = new mongoose.Schema(
   {
@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema(
     },
     author: {
       type: ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     created: {
       type: Date,
@@ -19,7 +19,7 @@ const postSchema = new mongoose.Schema(
     likes: [
       {
         type: ObjectId,
-        ref: 'User',
+        ref: "User",
       },
     ],
     comments: [
@@ -29,13 +29,18 @@ const postSchema = new mongoose.Schema(
           required: true,
           maxlength: 120,
         },
-        author: { type: ObjectId, ref: 'User' },
+        author: { type: ObjectId, ref: "User" },
+        created: {
+          type: Date,
+          default: Date.now,
+        },
       },
+      { timestamps: true },
     ],
   },
   { timestamps: true }
-)
+);
 
-const Post = mongoose.model('Post', postSchema)
+const Post = mongoose.model("Post", postSchema);
 
-export default Post
+export default Post;

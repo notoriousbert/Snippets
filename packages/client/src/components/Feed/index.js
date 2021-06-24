@@ -121,7 +121,6 @@ export default function Feed(props) {
       const allPosts = await axios.get("posts");
       setPosts(allPosts.data);
       setPostLoading(false);
-      console.log(user)
     } catch (err) {
       console.error(err.message);
       setPostLoading(false);
@@ -132,10 +131,6 @@ export default function Feed(props) {
   const getUser = async () => {
     try {
       const userResponse = await axios.get(`users/${user.username}`);
-      console.log(userResponse)
-      console.log(state)
-      console.log(user)
-      console.log(props)
       if (state.user.username === userResponse.data.username) {
         props.setProfilePicFromApp(userResponse.data.profile_image);
       }
