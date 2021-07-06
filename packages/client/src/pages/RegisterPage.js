@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  InputGroup,
-  Form,
-  Button,
-  Image,
-} from "react-bootstrap";
+import React, { isValidElement, useState } from "react";
+import { Container, Row, Col, InputGroup, Form, Button } from "react-bootstrap";
 import useRouter from "hooks/useRouter";
 import { useProvideAuth } from "hooks/useAuth";
-import { LandingHeader, LoadingSpinner, AvatarPicker } from "components";
+import {
+  LandingHeader,
+  LoadingSpinner,
+  AvatarPicker,
+  FileUploader,
+} from "components";
 import { setAuthToken } from "utils/axiosConfig";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const initialState = {
   username: "",
@@ -23,12 +21,18 @@ const initialState = {
   errorMessage: null,
 };
 
-export default function RegisterPage( {setProfilePicFromApp } ) {
+export default function RegisterPage({
+  setProfilePicFromApp,
+  setCurrentUserFromApp,
+  profilePicFromApp,
+}) {
   const [data, setData] = useState(initialState);
   const auth = useProvideAuth();
   const router = useRouter();
 
   const [profileImage, setProfileImage] = useState();
+  const [fileName, setFileName] = useState();
+  const [fileData, getFileData] = useState({ name: "", path: "" });
 
   function getRandomProfileUrl() {
     //geneartes random pic in img
@@ -53,18 +57,35 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
     });
   };
 
+  const handleProfileUpload = async (event) => {};
+
   const handleSignup = async (event) => {
     const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();
 
-    if (data.password !== data.confirmPassword) {
-      toast.error(`Error: Password does not match Confirm Password`)
-      return 
-    }
+    const formData = new FormData();
+    formData.append("userUpload", fileName);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    };
 
-    if (form.checkValidity() === false) {
+    if (data.password !== data.confirmPassword) {
+      toast.error(`Error: Password does not match Confirm Password`);
+      return;
     }
+    const emailFormInput = document.querySelector("#email")
+    // if (emailFormInput.checkValidity() === false) {
+    //   toast.error('Please enter a vaild email address')
+    //   setData({
+    //     ...data,
+    //     isSubmitting: false,
+    //     errorMessage: null,
+    //   });
+    //   return
+    // }
 
     setData({
       ...data,
@@ -73,10 +94,26 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
     });
 
     try {
-      console.log(data.email)
-      const res = await auth.signup(data.username, data.password, profileImage, data.email);
-      console.log(res)
-      setProfilePicFromApp(profileImage)
+      if (fileName) {
+        try {
+          await axios.post(`/api/upload`, formData, config);
+          setFileName(null);
+        } catch (error) {
+          console.log(error);
+          setData({
+            ...data,
+            isSubmitting: false,
+            errorMessage: error ? error.message || error.statusText : null,
+          });
+        }
+      }
+      const res = await auth.signup(
+        data.username,
+        data.password,
+        profileImage,
+        data.email
+      );
+      setProfilePicFromApp(profileImage);
       setData({
         ...data,
         isSubmitting: false,
@@ -85,7 +122,7 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
       setAuthToken(res.token);
       router.push("/");
     } catch (error) {
-      console.log(error)
+      console.log(error);
       setData({
         ...data,
         isSubmitting: false,
@@ -124,13 +161,21 @@ export default function RegisterPage( {setProfilePicFromApp } ) {
               </InputGroup>
             </Form.Group>
             <Form.Group>
-              <Form.Label>Choose An Avatar</Form.Label>
+              <Form.Label>Choose An Avatar Or Upload Your Own</Form.Label>
             </Form.Group>
-            <AvatarPicker
-              setProfileImage={setProfileImage}
-            />
             <Form.Group>
-            <Form.Label htmlFor="Register">Email</Form.Label>
+              <AvatarPicker setProfileImage={setProfileImage} />
+              <div className="registration-page-file-upload">
+                <FileUploader
+                  fileName={fileName}
+                  setFileName={setFileName}
+                  setProfileImage={setProfileImage}
+                  setProfilePicFromApp={setProfilePicFromApp}
+                />
+              </div>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label htmlFor="Register">Email</Form.Label>
               <Form.Control
                 type="email"
                 name="email"

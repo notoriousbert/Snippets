@@ -22,8 +22,24 @@ function App() {
   const [currentUserFromApp, setCurrentUserFromApp] = useState();
   const [profilePicFromApp, setProfilePicFromApp] = useState();
 
+  const getUser = async () => {
+    console.log(user.username);
+    try {
+      const userResponse = await axios.get(`users/${user.username}`);
+      // setUser(userResponse.data);
+      // setLoading(false);
+      // setProfileImage(userResponse.data.profile_image);
+      // if (state.user.username === userResponse.data.username) {
+      //   setProfilePicFromApp(userResponse.data.profile_image);
+      // }
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
+      console.log(user);
       setProfilePicFromApp(user.profile_image);
     }
   }, []);
@@ -61,7 +77,17 @@ function App() {
                       />
                     )}
                   />
-                  <Route exact path="/p/:pid" component={PostDetailPage} />
+                  <Route
+                    exact
+                    path="/p/:pid"
+                    render={(props) => (
+                      <PostDetailPage
+                        {...props}
+                        getUser={getUser}
+                        profilePicFromApp={profilePicFromApp}
+                      />
+                    )}
+                  />
                   <Route
                     exact
                     path="/"
@@ -111,6 +137,8 @@ function App() {
               <RegisterPage
                 {...props}
                 setProfilePicFromApp={setProfilePicFromApp}
+                setCurrentUserFromApp={setCurrentUserFromApp}
+                profilePicFromApp={profilePicFromApp}
               />
             )}
           />

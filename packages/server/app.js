@@ -9,6 +9,7 @@ import keys from './config/keys'
 import router from './routes'
 import { requestLogger, errorHandler } from './middleware'
 import seedDatabase from './seedDatabase'
+import fileUpload from 'express-fileupload'
 
 const createError = require('http-errors')
 
@@ -38,6 +39,10 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(requestLogger)
+// app.use(express.limit('4M'));
+app.use(fileUpload({
+  createParentPath: true
+}));
 
 // api router
 app.use(keys.app.apiEndpoint, router)

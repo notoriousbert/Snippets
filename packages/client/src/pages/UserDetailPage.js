@@ -7,7 +7,7 @@ import {
   Collapse,
   Figure,
 } from "react-bootstrap";
-import { LoadingSpinner, Post, AvatarPicker } from "components";
+import { LoadingSpinner, Post, AvatarPicker, FileUploader } from "components";
 import { useProvideAuth } from "hooks/useAuth";
 import { useRequireAuth } from "hooks/useRequireAuth";
 import axios from "utils/axiosConfig.js";
@@ -27,12 +27,14 @@ export default function UserDetailPage({
   const { state } = useProvideAuth();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
+  const [fileData, getFileData] = useState({ name: "", path: "" });
   const [validatedCurrent, setValidatedCurrent] = useState(false);
   const [validatedNew, setValidatedNew] = useState(false);
   const [validatedConfirm, setValidatedConfirm] = useState(false);
   const [openPassword, setOpenPassword] = useState(false);
   const [openProfilePic, setOpenProfilePic] = useState(false);
   const [profileImage, setProfileImage] = useState();
+  const [fileName, setFileName] = useState();
   const [newPasswordData, setNewPasswordData] = useState({
     newPassword: "",
     isSubmitting: false,
@@ -54,13 +56,13 @@ export default function UserDetailPage({
   } = useRequireAuth();
 
   const getUser = async () => {
+    console.log(uid);
     try {
       const userResponse = await axios.get(`users/${uid}`);
       setUser(userResponse.data);
       setLoading(false);
+      setProfileImage(userResponse.data.profile_image);
       if (state.user.username === userResponse.data.username) {
-        setProfileImage(userResponse.data.profile_image)
-        setCurrentUserFromApp(userResponse.data);
         setProfilePicFromApp(userResponse.data.profile_image);
       }
     } catch (err) {
@@ -70,11 +72,6 @@ export default function UserDetailPage({
 
   useEffect(() => {
     isAuthenticated && getUser();
-    console.log(state)
-    // if (user) {
-    //   setProfileImage(user.profile_image);
-    //   setProfilePicFromApp(user.profile_image);
-    // }
   }, [uid, isAuthenticated]);
 
   const handleInputChange = (event) => {
@@ -147,6 +144,8 @@ export default function UserDetailPage({
         profileImage: profileImage,
       });
       toast.success("Your password has been updated.");
+      localStorage.clear();
+      history.push("/login");
 
       // don't forget to update loading state and alert success
     } catch (error) {
@@ -167,11 +166,58 @@ export default function UserDetailPage({
     setOpenPassword(!openPassword);
   };
 
+  const handleProfileUpload = async (event) => {
+    console.log("inside of fileUploader handler");
+    // setFileName(event.target.files[0]);
+    // setProfileImage(`/${event.target.files[0].name}`);
+    // console.log(fileName)
+    // setProfilePicFromApp(event.target.files[0].name);
+    const formData = new FormData();
+    formData.append("userUpload", fileName);
+    console.log(formData);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    };
+    try {
+      await axios.post(`upload`, formData, config).then((response) => {
+        console.log(response.data);
+        getFileData({
+          name: response.data.name,
+          path: "http://localhost:3000" + response.data.path,
+        });
+      });
+    } catch (error) {}
+    setFileName(null);
+  };
+
   const handleUpdateProfilePic = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (fileName) {
+      handleProfileUpload();
+    }
+    // const formData = new FormData();
+    // formData.append("userUpload", fileName);
+    // console.log(formData);
+    // const config = {
+    //   headers: {
+    //     "content-type": "multipart/form-data",
+    //   },
+    // };
+    // try {
+    //   await axios.post(`upload`, formData, config).then((response) => {
+    //     console.log(response.data);
+    //     getFileData({
+    //       name: response.data.name,
+    //       path: "http://localhost:3000" + response.data.path,
+    //     });
+    //   });
+    // } catch (error) {}
+    // console.log(profileImage)
+    // console.log(fileData.name)
     user.profile_image = profileImage;
-    setProfilePicFromApp(profileImage);
     setNewPasswordData({
       ...newPasswordData,
       isSubmitting: true,
@@ -183,7 +229,6 @@ export default function UserDetailPage({
       const {
         user: { uid },
       } = state;
-      console.log(uid);
       await axios.put(`users/${uid}`, {
         currentPassword: "",
         newPassword: "",
@@ -206,6 +251,8 @@ export default function UserDetailPage({
       errorMessage: null,
     });
     setOpenProfilePic(!openProfilePic);
+    setProfilePicFromApp(profileImage);
+    getUser();
   };
 
   if (!isAuthenticated) {
@@ -231,23 +278,29 @@ export default function UserDetailPage({
         </Button>
         <Card bg="header" className="text-center">
           <Card.Body>
-            <Figure
-              className="bg-border-color rounded-circle overflow-hidden my-auto ml-2 p-1"
-              style={{
-                height: "50px",
-                width: "50px",
-                backgroundColor: "white",
-              }}
-            >
-              <Figure.Image
-                onClick={() =>
-                  state.user.username === uid &&
-                  setOpenProfilePic(!openProfilePic)
-                }
-                src={user.profile_image}
-                className="w-100 h-100"
-              />
-            </Figure>
+            <Container className="mb-4">
+              <Figure
+                className="bg-border-color my-auto ml-2 p-1 thumbnail mr-4 mb-4 pb-4"
+                style={{
+                  height: "55px",
+                  width: "55px",
+                  backgroundColor: "transparent",
+                }}
+              >
+                <Figure.Image
+                  onClick={() =>
+                    state.user.username === uid &&
+                    setOpenProfilePic(!openProfilePic)
+                  }
+                  src={
+                    state.user.username === uid
+                      ? profilePicFromApp
+                      : profileImage
+                  }
+                  className="w-95 h-95 rounded img-fluid overflow-hidden"
+                />
+              </Figure>
+            </Container>
             <Card.Title>{uid}</Card.Title>
             <Card.Title>{user.email}</Card.Title>
             {state.user.username === uid && (
@@ -262,6 +315,7 @@ export default function UserDetailPage({
             )}
             <Collapse in={openProfilePic}>
               <Container animation="false" className="pb-4">
+                <h5>Select one of the avatars below, or upload your own!</h5>
                 <Form
                   id="profileImage"
                   noValidate
@@ -275,6 +329,19 @@ export default function UserDetailPage({
                     currentUserFromApp={currentUserFromApp}
                     setProfilePicFromApp={setProfilePicFromApp}
                     state={state}
+                  />
+                  <FileUploader
+                    setProfileImage={setProfileImage}
+                    getUser={getUser}
+                    setCurrentUserFromApp={setCurrentUserFromApp}
+                    currentUserFromApp={currentUserFromApp}
+                    setProfilePicFromApp={setProfilePicFromApp}
+                    state={state}
+                    fileName={fileName}
+                    getFileData={getFileData}
+                    profileImage={profileImage}
+                    fileData={fileData}
+                    setFileName={setFileName}
                   />
                   <Button type="submit" disabled={newPasswordData.isSubmitting}>
                     {newPasswordData.isSubmitting ? (
@@ -380,6 +447,9 @@ export default function UserDetailPage({
             <Post
               key={post._id}
               post={post}
+              profilePicFromApp={
+                state.user.username === uid ? profilePicFromApp : profileImage
+              }
               getPosts={getUser}
               userDetail
               userFromDetailPage={user}

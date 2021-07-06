@@ -28,4 +28,8 @@
 .modal-body {
   color: black;
 }
+
+.thumbnail {
+  background-size: cover;
+}
 /*# sourceMappingURL=Post.css.map */

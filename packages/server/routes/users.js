@@ -8,6 +8,7 @@ const router = express.Router();
 router
   .route("/:id")
   .get(async (request, response) => {
+    console.log('this get request aint working')
     const populateQuery = [
       {
         path: "posts",
@@ -106,5 +107,7 @@ router
       }
     }
   });
+
+  
 
 module.exports = router;

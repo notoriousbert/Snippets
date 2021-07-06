@@ -4,6 +4,7 @@ import userRouter from './users'
 import postRouter from './posts'
 import activitiesRouter from './activities'
 import katasRouter from './katas'
+import uploadRouter from './upload'
 
 const router = express.Router()
 
@@ -16,5 +17,6 @@ router.use('/users', userRouter)
 router.use('/posts', postRouter)
 router.use('/activities', activitiesRouter)
 router.use('/katas', katasRouter)
+router.use('/upload', uploadRouter)
 
 module.exports = router

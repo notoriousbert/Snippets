@@ -37,13 +37,13 @@ export default function Header({ currentUserFromApp, profilePicFromApp }) {
                     style={{
                       height: "35px",
                       width: "35px",
-                      background: "white",
+                      background: "transparent",
                     }}
                   >
                     <Figure.Image
                       // onClick={}
                       src={profilePicFromApp}
-                      className="w-100 h-100"
+                      className="w-100 h-100 rounded-circle"
                     />
                   </Figure>
                 </Nav.Link>

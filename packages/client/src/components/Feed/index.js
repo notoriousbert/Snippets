@@ -121,6 +121,12 @@ export default function Feed(props) {
       const allPosts = await axios.get("posts");
       setPosts(allPosts.data);
       setPostLoading(false);
+      filteredPosts.map((post) => {
+        if (post) {
+          console.log(post)
+        }
+        return null;
+      })
     } catch (err) {
       console.error(err.message);
       setPostLoading(false);
@@ -197,14 +203,14 @@ export default function Feed(props) {
           {posts && queryEntered
             ? filteredPosts.map((post) => {
                 if (post) {
-                  return <Post key={post._id} post={post} />;
+                  return <Post key={post._id} profilePicFromApp={state.user.username === post.author.username && props.profilePicFromApp}  post={post} />;
                 }
                 return null;
               })
             : posts.map((post) => {
                 if (post) {
                   return (
-                    <Post key={post._id} post={post} getPosts={getPosts} />
+                    <Post key={post._id} profilePicFromApp={state.user.username === post.author.username && props.profilePicFromApp} post={post} getPosts={getPosts} />
                   );
                 }
                 return null;

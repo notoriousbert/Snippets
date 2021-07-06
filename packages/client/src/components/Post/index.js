@@ -30,6 +30,7 @@ export default function Post({
   detail,
   userDetail,
   getPosts,
+  getPostDetailPost,
   userFromDetailPage,
   profilePicFromApp,
 }) {
@@ -67,6 +68,7 @@ export default function Post({
       try {
         await axios.post(`posts/like/${_id}`)
         getPosts();
+        getPostDetailPost()
         setStateLikes(likes);
       } catch (error) {
         console.log(error);
@@ -78,6 +80,7 @@ export default function Post({
       try {
         await axios.post(`posts/like/${_id}`);
         getPosts();
+        getPostDetailPost()
         setStateLikes(likes);
       } catch (error) {
         console.log(error);
@@ -169,14 +172,14 @@ export default function Post({
         <Media className="mb-n2 w-100">
           <Link to={`/u/${author.username}`}>
             <Figure
-              className="mr-4 bg-border-color rounded-circle overflow-hidden ml-2 p-1"
-              style={{ height: "50px", width: "50px", marginTop: "0px" }}
+              className="mr-4 rounded thumbnail ml-2 p-1"
+              style={{ height: "55px", width: "55px", marginTop: "0px" }}
             >
               <Figure.Image
                 src={
                   profilePicFromApp ? profilePicFromApp : author.profile_image
                 }
-                className="w-100 h-100"
+                className="w-95 h-95 rounded"
               />
             </Figure>
           </Link>

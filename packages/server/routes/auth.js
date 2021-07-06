@@ -17,8 +17,13 @@ router.post('/signup', async (req, res) => {
     return res.status(400).json({ error: 'Password must be 8 - 20 characters long' })
   }
 
-  if (!password || !username) {
-    return res.status(422).json({ error: 'please add all the fields' })
+  const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  if(reg.test(email) === false){
+    return res.status(422).json({ error: 'Please enter a valid email address' })
+  }
+
+  if (!password || !username || !email) {
+    return res.status(422).json({ error: 'Please add all the fields' })
   }
 
   User.findOne({ username: username })

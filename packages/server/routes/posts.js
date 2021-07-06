@@ -98,8 +98,6 @@ router.all("/like/:postId", requireAuth, async (request, response) => {
   const { postId } = request.params;
   const { user } = request;
 
-  console.log(user);
-
   const post = await Post.findOne({ _id: postId });
 
   if (!post) {
@@ -121,7 +119,6 @@ router.all("/like/:postId", requireAuth, async (request, response) => {
 
       response.json(result);
     }
-    console.log(user);
   } catch (err) {
     return response.status(422).json({ error: err });
   }
