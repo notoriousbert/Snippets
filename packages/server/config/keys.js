@@ -5,7 +5,7 @@ module.exports = {
   },
   database: {
     // url: process.env.MONGODB_URI || 'mongodb://localhost:27017/snippets',
-    url: "mongodb+srv://notoriousbert:BertBert220!!@cluster0.gqhem.mongodb.net/snippets?retryWrites=true&w=majority",
+    url: "mongodb+srv://notoriousbert:bertbert123@cluster0.gqhem.mongodb.net/snippets?retryWrites=true&w=majority",
   },
   jwt: {
     secret: process.env.JWT_SECRET || "jwt-secret",
