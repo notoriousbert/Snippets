@@ -11,8 +11,14 @@
     "uuid": "^3.4.0"
   },
   "scripts": {
+    "build": "yarn workspace client build && yarn workspace server build",
     "client": "yarn workspace client start",
-    "server": "yarn workspace server start",
-    "start": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn client\""
+    "server": "yarn workspace server develop",
+    "develop": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn client\"",
+    "start": "yarn workspace server start",
+    "watch": "webpack-dev-server --progress --colors --hot --inline"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
