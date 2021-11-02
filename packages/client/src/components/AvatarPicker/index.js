@@ -8,12 +8,13 @@ import { useState } from "react";
 export default function AvatarPicker(props) {
   const [pickedAvatar, setPickedAvatar] = useState("/bird.svg");
 
-  const imageClassWithBorder = "img-fluid m-2 p-3 border border-primary rounded mb-0";
-  const imageClassNoBorder = "img-fluid m-2 p-3";
+  const imageClassWithBorder =
+    "img-fluid p-3 border border-primary rounded mw-25";
+  const imageClassNoBorder = "img-fluid p-3 mw-25";
 
   useEffect(() => {
-    props.setProfileImage("/bird.svg")
-  }, [])
+    props.setProfileImage("/bird.svg");
+  }, []);
 
   let imgs = [
     "/bird.svg",
@@ -25,13 +26,12 @@ export default function AvatarPicker(props) {
     "/tiger.svg",
     "/whale.svg",
   ];
-  
 
   const avatarSelector = (event) => {
     setPickedAvatar(event.target.name);
-    props.setProfileImage(event.target.name)
+    props.setProfileImage(event.target.name);
     if (props.state) {
-      props.state.user.profile_image = pickedAvatar
+      props.state.user.profile_image = pickedAvatar;
     }
   };
 
@@ -49,7 +49,7 @@ export default function AvatarPicker(props) {
             key={index}
             rounded
             name={img}
-            style={{ maxWidth: '7rem' }}
+            style={{ maxWidth: "100px" }}
           />
         </div>
       );
@@ -63,28 +63,28 @@ export default function AvatarPicker(props) {
       let finalRow = [];
 
       row.forEach((image) => {
-        index === 2 ? 
-        finalRow.push(
-          <Col className="m-md-0 pb-1 mb-1" xs={6} md={4}>
-            {image}
-          </Col>
-        ) : 
-        finalRow.push(
-          <Col className="m-md-0" xs={6} md={4}>
-            {image}
-          </Col>
-        )
+        index === 2
+          ? finalRow.push(
+              <Col className="m-md-0 pb-1 mb-1" xs={6} md={4}>
+                {image}
+              </Col>
+            )
+          : finalRow.push(
+              <Col className="m-md-0" xs={6} md={4}>
+                {image}
+              </Col>
+            );
       });
 
       return finalRow;
     });
     return bootstrapFormattedRow.map((row, index) => {
       if (index === 2) {
-        return <Row className="mb-0 pb-0">{row}</Row>
-      } else { 
-        return <Row>{row}</Row>
+        return <Row className="mb-0 pb-0">{row}</Row>;
+      } else {
+        return <Row>{row}</Row>;
       }
-  });
+    });
   };
 
   return (

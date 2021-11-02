@@ -76,7 +76,7 @@ export default function RegisterPage({
       toast.error(`Error: Password does not match Confirm Password`);
       return;
     }
-    const emailFormInput = document.querySelector("#email")
+    const emailFormInput = document.querySelector("#email");
     // if (emailFormInput.checkValidity() === false) {
     //   toast.error('Please enter a vaild email address')
     //   setData({
