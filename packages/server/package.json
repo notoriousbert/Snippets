@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "clean": "rm -rf build && mkdir build",
-    "build-babel": "babel -d ./build ./src -s",
-    "build": "npm run clean && npm run build-babel",
     "develop": "node_modules/.bin/nodemon --exec babel-node ./src/bin/www",
     "start": "node ./build/bin/www.js"
   },
